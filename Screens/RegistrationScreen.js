@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Image,
   ImageBackground,
@@ -13,10 +13,10 @@ import {
   Keyboard,
   Alert,
 } from "react-native";
-
 import { useFonts } from "expo-font";
 import AddPhoto from "../assets/images/add-photo.svg";
 import { AntDesign } from "@expo/vector-icons";
+
 
 const RegistrationScreen = () => {
   const [login, setLogin] = useState("");
@@ -26,6 +26,22 @@ const RegistrationScreen = () => {
   const [loginFocused, setLoginFocused] = useState(false);
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
+  const [keyboardShown, setKeyboardShown] = useState(false);
+  
+   useEffect(() => {
+     const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardShown(true);
+    });
+
+     const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardShown(false);
+    });
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
 
   const [fontsLoaded] = useFonts({
     RobotoRegular: require("../assets/fonts/Roboto-Regular.ttf"),
@@ -55,15 +71,18 @@ const RegistrationScreen = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <KeyboardAvoidingView style={styles.container}
-        behavior={Platform.OS == "ios" ? "padding" : "height"}
-      >
+      <View style={styles.container}>
         <ImageBackground
           style={styles.backgroundImage}
           source={require("../assets/images/bg.jpg")}
-          resizeMode="cover"
         >
-            <View style={styles.formWrapper}>
+          <View style={{
+            ...styles.formWrapper,
+            paddingBottom: keyboardShown ? 32 : 78,
+          }}>
+              <KeyboardAvoidingView
+                behavior={Platform.OS == "ios" ? "padding" : "height"}
+              >
               <View style={styles.photoContainer}>
                 <TouchableOpacity style={styles.addPhoto}>
                   <Image style={styles.avatar} source={AddPhoto} />
@@ -71,7 +90,7 @@ const RegistrationScreen = () => {
                 </TouchableOpacity>
               </View>
               <Text style={styles.title}>Реєстрація</Text>
-              <View style={styles.form}>
+              <View>
                 <View>
                   <TextInput
                     style={{
@@ -107,7 +126,7 @@ const RegistrationScreen = () => {
                     onBlur={() => setEmailFocused(false)}
                   />
                 </View>
-                <View style={{ position: "relative", marginBottom: 43 }}>
+                <View style={{ position: "relative" }}>
                   <TextInput
                     style={{
                       ...styles.input,
@@ -138,11 +157,12 @@ const RegistrationScreen = () => {
                   >
                   <Text style={styles.regButtonText}>Зареєструватися</Text>
                 </TouchableOpacity>
-              </View>
               <Text style={styles.footerText}>Вже є акаунт? Увійти</Text>
+              </View>
+        </KeyboardAvoidingView>
             </View>
         </ImageBackground>
-                  </KeyboardAvoidingView>
+        </View>
     </TouchableWithoutFeedback>
   );
 };
@@ -150,22 +170,25 @@ const RegistrationScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+      justifyContent: "flex-end",
   },
   backgroundImage: {
     flex: 1,
     justifyContent: "flex-end",
+    resizeMode: "cover"
   },
   formWrapper: {
     position: "relative",
-    paddingTop: 85,
+    paddingTop: 92,
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     backgroundColor: "#FFFFFF",
+    paddingHorizontal: 16,
   },
   photoContainer: {
     position: "absolute",
-    top: -60,
-    left: 137,
+    top: -150,
+    left: '33%',
     width: 120,
     height: 120, 
     backgroundColor: "#F6F6F6",
@@ -181,12 +204,10 @@ const styles = StyleSheet.create({
     fontFamily: "RobotoMedium",
     fontSize: 30,
     lineHeight: 35,
+    letterSpacing: 0.01,
     textAlign: "center",
     marginBottom: 32,
     color: "#212121",
-  },
-  form: {
-    marginHorizontal: 25,
   },
   input: {
     fontFamily: "RobotoRegular",
@@ -208,7 +229,8 @@ const styles = StyleSheet.create({
     color: "#1B4371",
   },
   regButton: {
-    borderRadius: 30,
+    marginTop: 43,
+    borderRadius: 100,
     paddingVertical: 16,
     backgroundColor: "#FF6C00",
   },
@@ -225,7 +247,6 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     textAlign: "center",
     marginTop: 16,
-    marginBottom: 78,
     color: "#1B4371",
   },
 });

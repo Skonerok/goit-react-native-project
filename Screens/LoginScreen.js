@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ImageBackground,
   KeyboardAvoidingView,
@@ -22,6 +22,23 @@ const LoginScreen = () => {
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
 
+  const [keyboardShown, setKeyboardShown] = useState(false);
+  
+   useEffect(() => {
+     const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardShown(true);
+    });
+
+     const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardShown(false);
+    });
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+   }, []);
+  
   const [fontsLoaded] = useFonts({
     RobotoRegular: require("../assets/fonts/Roboto-Regular.ttf"),
     RobotoMedium: require("../assets/fonts/Roboto-Medium.ttf"),
@@ -46,17 +63,20 @@ const LoginScreen = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <KeyboardAvoidingView style={styles.container}
-        behavior={Platform.OS == "ios" ? "padding" : "height"}
-      >
+      <View style={styles.container}>
         <ImageBackground
           style={styles.backgroundImage}
           source={require("../assets/images/bg.jpg")}
-          resizeMode="cover"
         >
-            <View style={styles.formWrapper}>
+            <View style={{
+            ...styles.formWrapper,
+            paddingBottom: keyboardShown ? 32 : 144,
+          }}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS == "ios" ? "padding" : "height"}
+      >
               <Text style={styles.title}>Увійти</Text>
-              <View style={styles.form}>
+              <View>
                 <View>
                   <TextInput
                     style={{
@@ -75,7 +95,7 @@ const LoginScreen = () => {
                     onBlur={() => setEmailFocused(false)}
                   />
                 </View>
-                <View style={{ position: "relative", marginBottom: 43 }}>
+                <View style={{ position: "relative"}}>
                   <TextInput
                     style={{
                       ...styles.input,
@@ -111,9 +131,10 @@ const LoginScreen = () => {
                       <Text style={styles.footerTextUnderline}>Зареєструватися
                       </Text>
                       </Text>
+                  </KeyboardAvoidingView>
             </View>
         </ImageBackground>
-                  </KeyboardAvoidingView>
+        </View>
     </TouchableWithoutFeedback>
   );
 };
@@ -121,27 +142,28 @@ const LoginScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: "flex-end",
   },
   backgroundImage: {
     flex: 1,
     justifyContent: "flex-end",
+    resizeMode: "cover"
   },
   formWrapper: {
     paddingTop: 32,
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     backgroundColor: "#FFFFFF",
+    paddingHorizontal: 16,
   },
   title: {
     fontFamily: "RobotoMedium",
     fontSize: 30,
     lineHeight: 35,
+    letterSpacing: 0.01,
     textAlign: "center",
     marginBottom: 32,
     color: "#212121",
-  },
-  form: {
-    marginHorizontal: 25,
   },
   input: {
     fontFamily: "RobotoRegular",
@@ -163,7 +185,8 @@ const styles = StyleSheet.create({
     color: "#1B4371",
   },
   loginButton: {
-    borderRadius: 30,
+    marginTop: 43,
+    borderRadius: 100,
     paddingVertical: 16,
     backgroundColor: "#FF6C00",
   },
@@ -180,7 +203,6 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     textAlign: "center",
     marginTop: 16,
-    marginBottom: 144,
     color: "#1B4371",
   },
   footerTextUnderline: {
